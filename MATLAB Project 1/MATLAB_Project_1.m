@@ -43,7 +43,7 @@ g = alpha .* a .* cos((2 .* pi .* F_c .* t) - (2 .* pi * F_c .* tau) - (2 .* pi 
 
 % Noise
 % L = idk
-% noise = sqrt(Pn ./ 2) .* (randn(L,1) + (1j .* randn(L,1)));
+noise = sqrt(Pn ./ 2) .* (randn(L,1) + (1j .* randn(L,1)));
 
 %%% Part 1
 
@@ -77,7 +77,7 @@ F_conv = -2e14:20e9:2e14;
 F_f_conv = linspace(-2e10, 2e10, length(F_conv))
 plot(F_f_conv, fftshift(abs(x_BPF)))
 
-t_conv = 0:F_s:2*T_p; % time array for x_BPF; if you plot it, it is centered at 0.5...delay?
+t_conv = 0:F_s:2*T_p; % time array for x_BPF; if you plot it, it is centered at 0.5...delay or is t_conv wrong?
 
 % Scaling and Truncation -- a problem for future allyson lmao
 x_BPF = (sqrt(2)./max(x_BPF)) .* x_BPF;
@@ -92,9 +92,28 @@ new_max = ((2 .* R_max) ./ c) + T_p + T_2;
 t_new = new_min:F_s:new_max;
 
 % Signal Interpolation
+received = interp1(t_conv, x_BPF, t_new, 'linear', 'extrap'); % not tested yet; don't know if method is correct
 
 % Downconversion
 cos_new = cos(2 .* pi .* F_c .* t_new);
 sin_new = sin(2 .* pi .* F_c .* t_new);
 
+D1 = cos_new .* received;
+D2 = sin_new .* received;
+
+%low pass
+
+
 % Scaling and Truncation-- YET ANOTHER problem for future allyson lmao
+
+
+% Downsampling
+
+
+% Noise
+
+% Baseband copy of waveform for matched filter
+x_ = a .* exp(1j .* 2 .* pi .* (0.5 .* B) .* t + 1j .* pi .* gamma .* t .* t);
+x_* = conj(fliplr(x_));
+
+% need to multiply that with downsampled waveform
