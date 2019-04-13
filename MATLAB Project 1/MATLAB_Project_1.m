@@ -20,6 +20,7 @@ sflag = 20e9; % Sampling
 Pn = 10; % Noise power
 sampling_rate = 20e9;
 F_s = 1 ./ sampling_rate; % Period
+n = 2; % Downsampling -- CHANGE THIS IT IS WRONG
 
 %%% Background
 
@@ -41,10 +42,6 @@ x = a .* cos(((2 .* pi) .* ((2 .* pi) .* (F_c - (0.5 .* B))) .* t) + (pi .* gamm
 % g(t)
 g = alpha .* a .* cos((2 .* pi .* F_c .* t) - (2 .* pi * F_c .* tau) - (2 .* pi .* (-0.5) .* B .* t) + (2 .* pi .* 0.5 .* tau) + (pi .* gamma .* (t - tau) .* (t - tau)));
 
-% Noise
-% L = idk
-% noise = sqrt(Pn ./ 2) .* (randn(L,1) + (1j .* randn(L,1)));
-
 %%% Part 1
 
 % Upconverting
@@ -53,11 +50,11 @@ x_1F_upconverted = upconvert .* x_1F;
 F = -1e14:20e9:1e14;
 F_f = linspace(-1e10, 1e10, length(F))
 figure(1)
-plot(F_f,fftshift(abs(fft(x_1F_upconverted))))
+plot(F_f,fftshift(abs(fft(x_1F))))
 
 
 figure(2)
-plot(F_f,fftshift(abs(fft(x_1F))))
+plot(F_f,fftshift(abs(fft(x_1F_upconverted))))
 
 % Bandpass filter
 T_1 = -250e-9; % Not sure about this
@@ -74,13 +71,14 @@ plot(F_f,fftshift(abs(fft(h_BPF))))
 x_BPF = conv(h_BPF,x_1F_upconverted);
 figure(4)
 F_conv = -2e14:20e9:2e14;
-F_f_conv = linspace(-2e10, 2e10, length(F_conv))
+F_f_conv = linspace(-2e10, 2e10, length(F_conv));
+figure(4)
 plot(F_f_conv, fftshift(abs(x_BPF)))
 
 t_conv = 0:F_s:2*T_p; % time array for x_BPF; if you plot it, it is centered at 0.5...delay?
 
-% Scaling and Truncation -- a problem for future allyson lmao
-x_BPF = (sqrt(2)./max(x_BPF)) .* x_BPF;
+% Scaling and Truncation -- a problem for future allyson lol
+x_BPF = (sqrt(2 .* P)./max(x_BPF)) .* x_BPF; % Very good! Thank you Joe
 
 
 % New Time Arrays
@@ -92,9 +90,30 @@ new_max = ((2 .* R_max) ./ c) + T_p + T_2;
 t_new = new_min:F_s:new_max;
 
 % Signal Interpolation
+x_interp = 
 
 % Downconversion
 cos_new = cos(2 .* pi .* F_c .* t_new);
 sin_new = sin(2 .* pi .* F_c .* t_new);
+x_downconverted_cos = x_interp .* cos_new;
+x_downconverted_sin = x_interp .* sin_new;
 
-% Scaling and Truncation-- YET ANOTHER problem for future allyson lmao
+% Low Pass Filter
+
+
+% Scaling and Truncation-- YET ANOTHER problem for future allyson lol
+x_downconverted_cos_lowpass = (sqrt(2 .* P) ./ max(x_downconverted_cos_lowpass)) .* x_downconverted_cos_lowpass;
+x_downconverted_sin_lowpass = (sqrt(2 .* P) ./ max(x_downconverted_sin_lowpass)) .* x_downconverted_sin_lowpass;
+
+% Combination
+x_downconverted_lowpass = x_downconverted_cos_lowpass + x_downconverted_sin_lowpass;
+
+% Downsampling
+x_downconverted_lowpass = downsample(x_downconverted_lowpass,n);
+
+% Adding Noise
+L = length(t_new);
+noise = sqrt(Pn ./ 2) .* (randn(L,1) + (1j .* randn(L,1)));
+x_noise = x_downcoverted_lowpass + noise; 
+
+% Baseband Copy
