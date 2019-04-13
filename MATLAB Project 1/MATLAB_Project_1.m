@@ -42,13 +42,6 @@ x = a .* cos(((2 .* pi) .* ((2 .* pi) .* (F_c - (0.5 .* B))) .* t) + (pi .* gamm
 % g(t)
 g = alpha .* a .* cos((2 .* pi .* F_c .* t) - (2 .* pi * F_c .* tau) - (2 .* pi .* (-0.5) .* B .* t) + (2 .* pi .* 0.5 .* tau) + (pi .* gamma .* (t - tau) .* (t - tau)));
 
-<<<<<<< HEAD
-% Noise
-% L = idk
-noise = sqrt(Pn ./ 2) .* (randn(L,1) + (1j .* randn(L,1)));
-
-=======
->>>>>>> 5e5cd9bc2f4bb118a78fb6bb6c197cc12dfb5bd8
 %%% Part 1
 
 % Upconverting
@@ -58,7 +51,6 @@ F = -1e14:20e9:1e14;
 F_f = linspace(-1e10, 1e10, length(F));
 figure(1)
 plot(F_f,fftshift(abs(fft(x_1F))))
-
 
 figure(2)
 plot(F_f,fftshift(abs(fft(x_1F_upconverted))))
@@ -96,8 +88,7 @@ new_max = ((2 .* R_max) ./ c) + T_p + T_2;
 t_new = new_min:F_s:new_max;
 
 % Signal Interpolation
-received = interp1(t_conv, x_BPF, t_new, 'linear', 'extrap'); % not tested yet; don't know if method is correct
-
+x_interp = interp1(t_conv + tau, x_BPF, t_new, 'linear', 'extrap'); % i assume I'm shifting t_conv by tau here
 
 % Downconversion
 cos_new = cos(2 .* pi .* F_c .* t_new);
@@ -106,7 +97,11 @@ x_downconverted_cos = x_interp .* cos_new;
 x_downconverted_sin = x_interp .* sin_new;
 
 % Low Pass Filter
-
+W_l = 2 .* (8e9); % want to keep 8GHz freq
+w_l = W .* transpose(hamming(length(t_BPF)));
+h_LBP = h = w .* sinc(W .* t_BPF); % not sure about t_BPF
+D1_conv = conv(h_LBP, D1);
+D2_conv = conv(h_LBP, D2);
 
 % Scaling and Truncation-- YET ANOTHER problem for future allyson lol
 x_downconverted_cos_lowpass = (sqrt(2 .* P) ./ max(x_downconverted_cos_lowpass)) .* x_downconverted_cos_lowpass;
@@ -123,26 +118,6 @@ L = length(t_new);
 noise = sqrt(Pn ./ 2) .* (randn(L,1) + (1j .* randn(L,1)));
 x_noise = x_downcoverted_lowpass + noise; 
 
-<<<<<<< HEAD
-D1 = cos_new .* received;
-D2 = sin_new .* received;
-
-%low pass
-
-
-% Scaling and Truncation-- YET ANOTHER problem for future allyson lmao
-
-
-% Downsampling
-
-
-% Noise
-
 % Baseband copy of waveform for matched filter
 x_ = a .* exp(1j .* 2 .* pi .* (0.5 .* B) .* t + 1j .* pi .* gamma .* t .* t);
 x_* = conj(fliplr(x_));
-
-% need to multiply that with downsampled waveform
-=======
-% Baseband Copy
->>>>>>> 5e5cd9bc2f4bb118a78fb6bb6c197cc12dfb5bd8
