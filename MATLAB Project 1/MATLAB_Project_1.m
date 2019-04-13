@@ -48,7 +48,7 @@ g = alpha .* a .* cos((2 .* pi .* F_c .* t) - (2 .* pi * F_c .* tau) - (2 .* pi 
 upconvert = cos(2 .* pi .* upconverting_freq .* t);
 x_1F_upconverted = upconvert .* x_1F;
 F = -1e14:20e9:1e14;
-F_f = linspace(-1e10, 1e10, length(F))
+F_f = linspace(-1e10, 1e10, length(F));
 figure(1)
 plot(F_f,fftshift(abs(fft(x_1F))))
 
@@ -80,7 +80,6 @@ t_conv = 0:F_s:2*T_p; % time array for x_BPF; if you plot it, it is centered at 
 % Scaling and Truncation -- a problem for future allyson lol
 x_BPF = (sqrt(2 .* P)./max(x_BPF)) .* x_BPF; % Very good! Thank you Joe
 
-
 % New Time Arrays
 delta_R = c / (2 .* B);
 R_min = R - (0.5 .* delta_R);
@@ -90,7 +89,7 @@ new_max = ((2 .* R_max) ./ c) + T_p + T_2;
 t_new = new_min:F_s:new_max;
 
 % Signal Interpolation
-x_interp = 
+
 
 % Downconversion
 cos_new = cos(2 .* pi .* F_c .* t_new);
