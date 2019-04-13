@@ -20,7 +20,7 @@ sflag = 20e9; % Sampling
 Pn = 10; % Noise power
 sampling_rate = 20e9;
 F_s = 1 ./ sampling_rate; % Period
-n = 2; % Downsampling -- CHANGE THIS IT IS WRONG
+n = 100; % Downsampling -- CHANGE THIS IT IS WRONG
 
 %%% Background
 
@@ -147,9 +147,9 @@ x_downconverted_lowpass_C = downsample(x_downconverted_lowpass,n);
 L = length(t_new);
 noise = sqrt(Pn ./ 2) .* (randn(L,1) + (1j .* randn(L,1)));
 x_noise = x_downconverted_lowpass_C + noise; 
-t_noise = linspace(-1e10,1e10,length(x_noise));
+F_noise = linspace(-1e10,1e10,length(x_noise));
 figure(8)
-plot(t_noise,abs(x_noise));
+plot(F_noise,fftshift(abs(fft(x_noise))));
 xlabel('Frequency (Hz)');
 ylabel('Signal Strength (V/m)');
 
