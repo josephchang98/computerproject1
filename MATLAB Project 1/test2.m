@@ -88,6 +88,8 @@ R_max = R + (0.5 .* delta_R);
 new_min = (2 .* R_min) ./ c;
 new_max = ((2 .* R_max) ./ c) + T_p + T_2;
 t_new = new_min:F_s:new_max;
+%t_next = linspace(new_min,new_max);
+%t_next = linspace(-1e10,1e10);
 
 % Signal Interpolation
 x_interp = interp1(t_conv + tau, x_BPF, t_new, 'linear', 'extrap'); % i assume I'm shifting t_conv by tau here
@@ -114,13 +116,15 @@ h_LBP =  w .* sinc(W .* t_BPF); % not sure about t_BPF
 h = h_LBP;
 D1_conv = conv(h_LBP, x_downconverted_cos);
 D2_conv = conv(h_LBP, x_downconverted_sin);
+t_cos = linspace(-1e10,1e10,length(D1_conv));
+t_sin = linspace(-1e10,1e10,length(D1_conv));
 figure(6)
 subplot(2,1,1);
-%plot(F_f_conv,fftshift(abs(fft(D1_conv))));
+plot(t_cos,D1_conv);
 xlabel('Frequency (Hz)');
 ylabel('Signal Strength (V/m)');
 subplot(2,1,2);
-%plot(F_f_conv,fftshift(abs(fft(D2_conv))));
+plot(t_sin,D2_conv);
 xlabel('Frequency (Hz)');
 ylabel('Signal Strength (V/m)');
 
@@ -130,8 +134,9 @@ x_downconverted_sin_lowpass = (sqrt(2 .* P) ./ max(x_downconverted_sin)) .* x_do
 
 % Combination
 x_downconverted_lowpass = x_downconverted_cos_lowpass + x_downconverted_sin_lowpass;
+t_conv_low = linspace(-1e10,1e10,length(x_downconverted_lowpass));
 figure(7)
-%plot(F_f_conv, fftshift(abs(fft(x_downconverted_lowpass))));
+plot(t_conv_low,x_downconverted_lowpass)
 xlabel('Frequency (Hz)');
 ylabel('Signal Strength (V/m)');
 
@@ -142,10 +147,9 @@ x_downconverted_lowpass_C = downsample(x_downconverted_lowpass,n);
 L = length(t_new);
 noise = sqrt(Pn ./ 2) .* (randn(L,1) + (1j .* randn(L,1)));
 x_noise = x_downconverted_lowpass_C + noise; 
+t_noise = linspace(-1e10,1e10,length(x_noise));
 figure(8)
-%plot(t_new,x_noise);
-%plot(F_f,fftshift(abs(fft(x_noise))));
-%plot(F_f_conv,x_noise)
+plot(t_noise,abs(x_noise));
 xlabel('Frequency (Hz)');
 ylabel('Signal Strength (V/m)');
 
